@@ -2,44 +2,51 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-# Load IPL winners data (replace with live scraping if needed)
+# IPL data (winners and runner-ups from 2008 to 2025)
 data = [
-    {"Year": 2025, "Winner": "KKR", "Runner-Up": "SRH", "Venue": "Chennai"},
-    {"Year": 2024, "Winner": "KKR", "Runner-Up": "SRH", "Venue": "Ahmedabad"},
-    {"Year": 2023, "Winner": "CSK", "Runner-Up": "GT", "Venue": "Ahmedabad"},
-    {"Year": 2022, "Winner": "GT", "Runner-Up": "RR", "Venue": "Ahmedabad"},
-    {"Year": 2021, "Winner": "CSK", "Runner-Up": "KKR", "Venue": "Dubai"},
-    # Add more historical data as needed
+    {"Year": 2008, "Winner": "Rajasthan Royals", "Runner-up": "Chennai Super Kings"},
+    {"Year": 2009, "Winner": "Deccan Chargers", "Runner-up": "Royal Challengers Bangalore"},
+    {"Year": 2010, "Winner": "Chennai Super Kings", "Runner-up": "Mumbai Indians"},
+    {"Year": 2011, "Winner": "Chennai Super Kings", "Runner-up": "Royal Challengers Bangalore"},
+    {"Year": 2012, "Winner": "Kolkata Knight Riders", "Runner-up": "Chennai Super Kings"},
+    {"Year": 2013, "Winner": "Mumbai Indians", "Runner-up": "Chennai Super Kings"},
+    {"Year": 2014, "Winner": "Kolkata Knight Riders", "Runner-up": "Kings XI Punjab"},
+    {"Year": 2015, "Winner": "Mumbai Indians", "Runner-up": "Chennai Super Kings"},
+    {"Year": 2016, "Winner": "Sunrisers Hyderabad", "Runner-up": "Royal Challengers Bangalore"},
+    {"Year": 2017, "Winner": "Mumbai Indians", "Runner-up": "Rising Pune Supergiant"},
+    {"Year": 2018, "Winner": "Chennai Super Kings", "Runner-up": "Sunrisers Hyderabad"},
+    {"Year": 2019, "Winner": "Mumbai Indians", "Runner-up": "Chennai Super Kings"},
+    {"Year": 2020, "Winner": "Mumbai Indians", "Runner-up": "Delhi Capitals"},
+    {"Year": 2021, "Winner": "Chennai Super Kings", "Runner-up": "Kolkata Knight Riders"},
+    {"Year": 2022, "Winner": "Gujarat Titans", "Runner-up": "Rajasthan Royals"},
+    {"Year": 2023, "Winner": "Chennai Super Kings", "Runner-up": "Mumbai Indians"},
+    {"Year": 2024, "Winner": "Gujarat Titans", "Runner-up": "Lucknow Super Giants"},
+    {"Year": 2025, "Winner": "Royal Challengers Bangalore", "Runner-up": "Punjab Kings"},
 ]
+
+# Create DataFrame
 df = pd.DataFrame(data)
 
-# Sidebar filters
-st.sidebar.title("Filter Options")
-year_filter = st.sidebar.selectbox("Select Year", options=["All"] + sorted(df["Year"].tolist(), reverse=True))
+st.title("IPL Winners & Runner-ups Dashboard")
 
-# Filter data
-if year_filter != "All":
-    df = df[df["Year"] == year_filter]
+# Sidebar - filter by year (show all years sorted)
+years = sorted(df["Year"].unique())
+selected_year = st.sidebar.selectbox("Select Year", ["All"] + [str(y) for y in years])
 
-# Main Title
-st.title("🏏 IPL Winners & Runner-Ups Dashboard (2008–2025)")
-st.markdown("""
-A simple dashboard showing the winners and runner-ups of IPL across seasons.
-Data is manually updated for accuracy up to 2025.
-""")
+# Filter dataframe based on selection
+if selected_year == "All":
+    filtered_df = df
+else:
+    filtered_df = df[df["Year"] == int(selected_year)]
 
-# Display table
-st.subheader("📅 Season Results")
-st.dataframe(df.sort_values("Year", ascending=False), use_container_width=True)
+st.subheader(f"IPL Results ({selected_year})")
+st.table(filtered_df)
 
-# Plot bar chart
-st.subheader("🏆 Number of Titles by Team")
-full_df = pd.DataFrame(data)
-winner_counts = full_df["Winner"].value_counts().reset_index()
-winner_counts.columns = ["Team", "Titles"]
-fig = px.bar(winner_counts, x="Team", y="Titles", color="Team", title="Total IPL Titles by Team")
+# Bar chart: Total titles by each team (Winner count)
+title_counts = df["Winner"].value_counts().reset_index()
+title_counts.columns = ["Team", "Titles"]
+
+fig = px.bar(title_counts, x="Team", y="Titles", title="Total IPL Titles by Team", text="Titles")
+fig.update_traces(textposition='outside')
+fig.update_layout(yaxis=dict(dtick=1))
 st.plotly_chart(fig, use_container_width=True)
-
-# Footer
-st.markdown("---")
-st.caption("Built with ❤️ by PV")
